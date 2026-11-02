@@ -1,0 +1,13 @@
+{
+  "name": "private-web-proxy",
+  "version": "1.0.0",
+  "description": "A lightweight personal web proxy",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "http-proxy-middleware": "^3.0.0"
+  }
+}
