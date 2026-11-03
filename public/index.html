@@ -3,126 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Development Terminal</title>
+    <meta name="theme-color" content="#f8f9fa">
+    <title>Study Hall</title>
     <style>
+        :root {
+            color-scheme: light;
+            --ink: #202124;
+            --muted: #5f6368;
+            --blue: #1a73e8;
+            --line: #dadce0;
+            --page: #f8f9fa;
+        }
+        * { box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
             margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            background: var(--page);
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .topbar {
+            height: 68px;
+            padding: 0 28px;
             display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
+            gap: 14px;
+            background: #fff;
+            border-bottom: 1px solid var(--line);
         }
-        .card {
-            background-color: #1e293b;
-            padding: 30px;
+        .mark {
+            width: 38px;
+            height: 38px;
+            display: grid;
+            place-items: center;
             border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-            width: 100%;
-            max-width: 480px;
-            border: 1px solid #334155;
-        }
-        h2 {
-            margin-top: 0;
-            font-size: 22px;
-            font-weight: 600;
-            color: #38bdf8;
-        }
-        p {
-            color: #94a3b8;
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 20px;
-        }
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 12px 16px;
-            border-radius: 6px;
-            border: 1px solid #475569;
-            background-color: #0f172a;
             color: #fff;
-            font-size: 15px;
-            outline: none;
-            box-sizing: border-box;
+            background: #4285f4;
+            font-size: 20px;
+            font-weight: 700;
         }
-        input[type="text"]:focus {
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        .brand { font-size: 20px; color: var(--muted); }
+        .brand strong { color: var(--ink); font-weight: 500; }
+        main { width: min(1050px, calc(100% - 36px)); margin: 54px auto; }
+        .welcome { margin-bottom: 30px; }
+        h1 { margin: 0 0 10px; font-size: clamp(28px, 5vw, 36px); font-weight: 400; }
+        .welcome p, .subtle { color: var(--muted); line-height: 1.55; }
+        .class-card, .gate, .resource-card {
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            box-shadow: 0 1px 2px rgba(60, 64, 67, .12);
         }
-        button {
-            padding: 12px;
-            background-color: #0284c7;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 15px;
-            font-weight: 600;
+        .gate { max-width: 560px; padding: 26px; }
+        .gate h2 { margin: 0 0 8px; font-size: 20px; font-weight: 500; }
+        .gate p { color: var(--muted); line-height: 1.5; }
+        .digits { display: flex; gap: 12px; margin-top: 20px; }
+        .digit {
+            width: 58px;
+            height: 52px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: #fff;
+            color: var(--blue);
+            font-size: 20px;
             cursor: pointer;
-            transition: background-color 0.2s;
         }
-        button:hover {
-            background-color: #0369a1;
-        }
-        .status-footer {
-            margin-top: 15px;
-            font-size: 12px;
-            color: #64748b;
-            text-align: center;
+        .digit:hover, .digit:focus-visible { background: #e8f0fe; outline: 2px solid #a8c7fa; }
+        .status { min-height: 22px; margin-top: 14px; color: var(--muted); font-size: 14px; }
+        .hub[hidden], .gate[hidden] { display: none; }
+        .hub-heading { margin: 0 0 20px; font-size: 22px; font-weight: 500; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; }
+        .resource-card { overflow: hidden; }
+        .card-color { height: 110px; display: grid; place-items: center; font-size: 42px; }
+        .games { background: #e8f0fe; }
+        .movies { background: #fce8e6; }
+        .tools { background: #e6f4ea; }
+        .card-body { padding: 18px; }
+        .card-body h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; }
+        .card-body p { min-height: 42px; margin: 0 0 16px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+        .links { display: flex; flex-wrap: wrap; gap: 12px; }
+        a { color: var(--blue); font-size: 14px; font-weight: 600; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .disabled-note { color: var(--muted); font-size: 13px; }
+        footer { margin-top: 34px; color: var(--muted); font-size: 12px; }
+        @media (max-width: 520px) {
+            .topbar { padding: 0 18px; }
+            main { margin-top: 34px; }
+            .gate { padding: 20px; }
         }
     </style>
 </head>
 <body>
+    <header class="topbar">
+        <div class="mark" aria-hidden="true">S</div>
+        <div class="brand"><strong>Study Hall</strong> <span aria-hidden="true">·</span> Home</div>
+    </header>
 
-    <div class="card">
-        <h2>Secure Web Terminal</h2>
-        <p>Enter a target URL to route requests securely through your personal Node.js backend infrastructure instance.</p>
-        
-        <div class="input-group">
-            <input type="text" id="urlInput" placeholder="https://example.com" value="https://">
-            <button onclick="launchProxy()">Establish Connection</button>
-        </div>
-        
-        <div class="status-footer" id="sessionStatus">
-            Session: Authenticating token...
-        </div>
-    </div>
+    <main>
+        <section class="welcome" aria-labelledby="page-title">
+            <h1 id="page-title">Welcome to your study hall</h1>
+            <p>A classroom-inspired home page for your favorite games and viewing resources.</p>
+        </section>
+
+        <section class="gate" id="gate" aria-labelledby="gate-title">
+            <h2 id="gate-title">Enter the room</h2>
+            <p>Press <strong>6</strong>, then <strong>7</strong> on your keyboard, or click the buttons below in that order.</p>
+            <div class="digits" aria-label="Enter the code 67">
+                <button class="digit" type="button" data-digit="6" aria-label="Enter 6">6</button>
+                <button class="digit" type="button" data-digit="7" aria-label="Enter 7">7</button>
+            </div>
+            <div class="status" id="status" role="status" aria-live="polite">Waiting for code 67…</div>
+        </section>
+
+        <section class="hub" id="hub" hidden aria-labelledby="hub-title">
+            <h2 class="hub-heading" id="hub-title">Your room</h2>
+            <div class="grid">
+                <article class="resource-card">
+                    <div class="card-color games" aria-hidden="true">🎮</div>
+                    <div class="card-body">
+                        <h3>Games</h3>
+                        <p>Pick a game to check out.</p>
+                        <div class="links">
+                            <a href="https://store.steampowered.com/app/1942280/Brotato/" target="_blank" rel="noopener noreferrer">Brotato ↗</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="resource-card">
+                    <div class="card-color movies" aria-hidden="true">🎬</div>
+                    <div class="card-body">
+                        <h3>Movies &amp; video</h3>
+                        <p>Browse video and films from established services.</p>
+                        <div class="links">
+                            <a href="https://www.pbs.org/video/" target="_blank" rel="noopener noreferrer">PBS Video ↗</a>
+                            <a href="https://archive.org/details/feature_films" target="_blank" rel="noopener noreferrer">Public-domain films ↗</a>
+                        </div>
+                    </div>
+                </article>
+                <article class="resource-card">
+                    <div class="card-color tools" aria-hidden="true">🛡️</div>
+                    <div class="card-body">
+                        <h3>Approved tools</h3>
+                        <p>Use only access tools provided or approved by your school or network administrator.</p>
+                        <span class="disabled-note">No general-purpose proxy is built into this page.</span>
+                    </div>
+                </article>
+            </div>
+            <footer>External links open in a new tab. Follow your school or network’s acceptable-use rules.</footer>
+        </section>
+    </main>
 
     <script>
-        // Automatically extract the password parameter from the browser's address bar
-        const urlParams = new URLSearchParams(window.location.search);
-        const token = urlParams.get('pwd');
-        
-        const statusElement = document.getElementById('sessionStatus');
-        if (token) {
-            statusElement.innerText = `Authenticated Session Token: Active (${token})`;
-            statusElement.style.color = "#4ade80";
-        } else {
-            statusElement.innerText = "Warning: No session token detected. Requests may be blocked.";
-            statusElement.style.color = "#f87171";
-        }
+        (() => {
+            const gate = document.getElementById('gate');
+            const hub = document.getElementById('hub');
+            const status = document.getElementById('status');
+            let entered = '';
 
-        function launchProxy() {
-            const destination = document.getElementById('urlInput').value.trim();
-            
-            if (destination && destination !== 'https://') {
-                // Construct the destination URL, appending the verified password token back to the route
-                let proxyUrl = `/proxy?url=${encodeURIComponent(destination)}`;
-                if (token) {
-                    proxyUrl += `&pwd=${encodeURIComponent(token)}`;
+            function enterDigit(digit) {
+                entered = (entered + digit).slice(-2);
+                if (entered === '67') {
+                    gate.hidden = true;
+                    hub.hidden = false;
+                    document.getElementById('hub-title').focus();
+                    return;
                 }
-                
-                window.location.href = proxyUrl;
-            } else {
-                alert('Please enter a valid target URL.');
+                status.textContent = entered === '6' ? '6 entered — now enter 7.' : 'That is not the code. Try 6, then 7.';
+                if (entered !== '6') entered = '';
             }
-        }
+
+            document.querySelectorAll('[data-digit]').forEach((button) => {
+                button.addEventListener('click', () => enterDigit(button.dataset.digit));
+            });
+            document.addEventListener('keydown', (event) => {
+                if (!gate.hidden && (event.key === '6' || event.key === '7')) enterDigit(event.key);
+            });
+        })();
     </script>
 </body>
 </html>
