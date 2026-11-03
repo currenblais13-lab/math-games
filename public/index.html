@@ -1,340 +1,89 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#101426">
-    <title>StudyOS — Desktop</title>
-    <style>
-        :root {
-            color-scheme: dark;
-            --text: #f7f8ff;
-            --muted: #a9b0c9;
-            --glass: rgba(23, 28, 54, .72);
-            --glass-strong: rgba(19, 23, 45, .94);
-            --line: rgba(255,255,255,.15);
-            --accent: #9c8cff;
-        }
-        * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            min-height: 100vh;
-            overflow: hidden;
-            color: var(--text);
-            background: #101426;
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-        }
-        button { font: inherit; color: inherit; }
-        .desktop {
-            position: relative;
-            min-height: 100vh;
-            isolation: isolate;
-            overflow: hidden;
-            background:
-                radial-gradient(ellipse at 18% 25%, rgba(116, 95, 255, .52), transparent 38%),
-                radial-gradient(ellipse at 82% 18%, rgba(32, 205, 225, .33), transparent 34%),
-                radial-gradient(ellipse at 74% 84%, rgba(232, 86, 177, .26), transparent 38%),
-                linear-gradient(135deg, #12162d 5%, #20234c 52%, #111629 100%);
-        }
-        .desktop::before, .desktop::after {
-            content: "";
-            position: absolute;
-            z-index: -1;
-            width: 45vw;
-            height: 45vw;
-            min-width: 360px;
-            min-height: 360px;
-            border: 1px solid rgba(255,255,255,.08);
-            border-radius: 46% 54% 60% 40%;
-            transform: rotate(-24deg);
-            pointer-events: none;
-        }
-        .desktop::before { top: 16%; left: 30%; box-shadow: 0 0 100px rgba(125,110,255,.16) inset; }
-        .desktop::after { top: 23%; left: 36%; transform: rotate(28deg); }
-        .menubar {
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            padding: 0 20px;
-            background: rgba(9,12,26,.42);
-            border-bottom: 1px solid rgba(255,255,255,.1);
-            backdrop-filter: blur(18px);
-            font-size: 13px;
-        }
-        .menu-left, .menu-right { display: flex; align-items: center; gap: 16px; }
-        .os-brand { display: flex; align-items: center; gap: 8px; font-weight: 750; letter-spacing: .2px; }
-        .os-glyph { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(145deg,#b6a4ff,#6c64e8); }
-        .menu-label { color: #e3e5f4; }
-        .menu-status { color: #d3d6e8; }
-        .desktop-area { position: relative; min-height: calc(100vh - 42px); padding: 32px; }
-        .desktop-icons { display: grid; width: 100px; gap: 18px; }
-        .desktop-icon {
-            width: 92px;
-            min-height: 88px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 7px;
-            padding: 8px 4px;
-            border: 1px solid transparent;
-            border-radius: 12px;
-            background: transparent;
-            cursor: pointer;
-            text-align: center;
-            text-shadow: 0 2px 6px rgba(0,0,0,.45);
-        }
-        .desktop-icon:hover, .desktop-icon:focus-visible { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.18); outline: none; }
-        .icon-art { font-size: 34px; filter: drop-shadow(0 6px 10px rgba(0,0,0,.25)); }
-        .icon-label { font-size: 12px; font-weight: 550; }
-        .welcome-widget {
-            position: absolute;
-            top: 12%;
-            left: 50%;
-            width: min(440px, calc(100% - 44px));
-            padding: 24px;
-            border: 1px solid var(--line);
-            border-radius: 22px;
-            background: var(--glass);
-            box-shadow: 0 24px 80px rgba(0,0,0,.24);
-            backdrop-filter: blur(24px);
-            transform: translateX(-50%);
-            text-align: center;
-        }
-        .widget-kicker { color: #c5baff; font-size: 11px; font-weight: 750; letter-spacing: 1.8px; text-transform: uppercase; }
-        .welcome-widget h1 { margin: 10px 0 8px; font-size: clamp(27px, 5vw, 38px); letter-spacing: -1.2px; }
-        .welcome-widget p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
-        .code-gate { margin-top: 21px; }
-        .code-gate p { margin-bottom: 13px; font-size: 13px; }
-        .digit-row { display: flex; justify-content: center; gap: 10px; }
-        .digit {
-            width: 47px;
-            height: 43px;
-            border: 1px solid rgba(255,255,255,.22);
-            border-radius: 12px;
-            background: rgba(255,255,255,.08);
-            cursor: pointer;
-            font-size: 17px;
-            font-weight: 700;
-            transition: .18s ease;
-        }
-        .digit:hover, .digit:focus-visible { border-color: #b7aaff; background: rgba(156,140,255,.25); outline: none; transform: translateY(-2px); }
-        .status { min-height: 18px; margin-top: 12px; color: #c2c7dc; font-size: 12px; }
-        .hub[hidden], .welcome-widget[hidden] { display: none; }
-        .hub-title { position: absolute; top: 14px; left: 50%; margin: 0; transform: translateX(-50%); color: rgba(255,255,255,.7); font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
-        .dock {
-            position: absolute;
-            bottom: 18px;
-            left: 50%;
-            display: flex;
-            align-items: end;
-            gap: 10px;
-            padding: 9px 12px;
-            border: 1px solid rgba(255,255,255,.17);
-            border-radius: 20px;
-            background: rgba(20,23,43,.62);
-            box-shadow: 0 14px 40px rgba(0,0,0,.28);
-            backdrop-filter: blur(22px);
-            transform: translateX(-50%);
-        }
-        .dock button { width: 48px; height: 48px; border: 0; border-radius: 14px; background: rgba(255,255,255,.1); cursor: pointer; font-size: 25px; transition: .18s ease; }
-        .dock button:hover, .dock button:focus-visible { background: rgba(255,255,255,.2); outline: 1px solid rgba(255,255,255,.25); transform: translateY(-5px) scale(1.06); }
-        .window {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: min(620px, calc(100% - 34px));
-            max-height: min(540px, calc(100% - 130px));
-            overflow: auto;
-            border: 1px solid rgba(255,255,255,.2);
-            border-radius: 18px;
-            background: var(--glass-strong);
-            box-shadow: 0 30px 90px rgba(0,0,0,.45);
-            backdrop-filter: blur(26px);
-            transform: translate(-50%, -50%);
-        }
-        .window[hidden] { display: none; }
-        .window-bar { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; padding: 14px 17px; border-bottom: 1px solid rgba(255,255,255,.12); background: rgba(19,23,45,.92); }
-        .window-title { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 700; }
-        .window-close { width: 30px; height: 30px; border: 0; border-radius: 9px; background: rgba(255,255,255,.1); cursor: pointer; font-size: 18px; }
-        .window-close:hover { background: rgba(255,255,255,.2); }
-        .window-content { padding: 20px; }
-        .window-content > p { margin: 0 0 18px; color: var(--muted); font-size: 13px; line-height: 1.55; }
-        .app-list { display: grid; gap: 11px; }
-        .app-link { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: rgba(255,255,255,.055); text-decoration: none; transition: .18s ease; }
-        .app-link:hover { border-color: rgba(183,170,255,.55); background: rgba(156,140,255,.12); transform: translateY(-1px); }
-        .app-link strong { display: block; margin-bottom: 4px; color: var(--text); font-size: 14px; }
-        .app-link small { color: var(--muted); font-size: 12px; }
-        .app-link .arrow { color: #c4b8ff; font-size: 17px; }
-        .notice { padding: 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; color: #d5d9ec; background: rgba(255,255,255,.05); font-size: 13px; line-height: 1.55; }
-        .notice strong { color: white; }
-        .toast { position: absolute; right: 22px; bottom: 22px; color: rgba(255,255,255,.65); font-size: 11px; }
-        @media (max-width: 620px) {
-            .menubar { padding: 0 12px; }
-            .menu-left, .menu-right { gap: 9px; }
-            .menu-label { display: none; }
-            .desktop-area { padding: 22px 12px; }
-            .desktop-icons { width: 74px; gap: 12px; }
-            .desktop-icon { width: 70px; min-height: 75px; }
-            .welcome-widget { top: 15%; padding: 20px 16px; }
-            .hub-title { top: 8px; }
-            .dock { bottom: 12px; gap: 7px; padding: 8px; }
-            .dock button { width: 43px; height: 43px; }
-            .toast { display: none; }
-        }
-        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#101a2d">
+  <title>StudyOS — Desktop</title>
+  <style>
+    :root{color-scheme:dark;--ink:#f4f7ff;--muted:#a9b5c9;--panel:rgba(22,31,49,.92);--stroke:rgba(255,255,255,.15);--accent:#77c7ff}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;overflow:hidden;color:var(--ink);font:14px/1.45 "Segoe UI",Inter,system-ui,-apple-system,sans-serif;background:#101a2d}button,input,textarea{font:inherit;color:inherit}button{cursor:pointer}
+    .desktop{position:relative;isolation:isolate;width:100%;height:100vh;overflow:hidden;background:radial-gradient(ellipse at 18% 82%,rgba(16,190,195,.32),transparent 36%),radial-gradient(ellipse at 80% 16%,rgba(84,123,238,.48),transparent 40%),linear-gradient(145deg,#13213a,#263c63 48%,#101b31)}
+    .desktop:before{content:"";position:absolute;z-index:-1;inset:10% 12% 10% 36%;border:1px solid rgba(255,255,255,.08);border-radius:49% 51% 58% 42%;transform:rotate(-18deg);box-shadow:0 0 120px rgba(104,168,255,.12) inset}.desktop:after{content:"";position:absolute;z-index:-1;inset:17% 18% 17% 42%;border:1px solid rgba(255,255,255,.07);border-radius:48% 52% 43% 57%;transform:rotate(22deg)}
+    .topbar{height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;background:rgba(9,15,27,.56);border-bottom:1px solid rgba(255,255,255,.12);backdrop-filter:blur(16px);font-size:12px}.top-left,.top-right{display:flex;align-items:center;gap:16px}.brand{font-weight:700;letter-spacing:.2px}.brand span{color:#93dcff}.top-button{border:0;background:transparent;padding:3px 5px;color:#e3eaf7}.top-button:hover{background:rgba(255,255,255,.12);border-radius:5px}.system-tray{display:flex;gap:11px;align-items:center;color:#e7edf8}.desktop-workspace{position:absolute;inset:34px 0 58px;padding:20px}.desktop-icons{display:grid;grid-template-columns:repeat(1,82px);grid-auto-rows:88px;gap:8px;width:90px}.desk-icon{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border:1px solid transparent;border-radius:6px;background:transparent;text-align:center;text-shadow:0 1px 5px #172032}.desk-icon:hover,.desk-icon:focus-visible{background:rgba(196,220,255,.15);border-color:rgba(255,255,255,.18);outline:none}.desk-icon .emoji{font-size:31px;filter:drop-shadow(0 3px 5px rgba(0,0,0,.32))}.desk-icon .label{font-size:11px}
+    .welcome{position:absolute;left:50%;top:43%;width:min(380px,calc(100% - 34px));padding:24px;border:1px solid var(--stroke);border-radius:14px;background:rgba(17,26,43,.78);box-shadow:0 22px 70px rgba(0,0,0,.32);backdrop-filter:blur(22px);transform:translate(-50%,-50%);text-align:center}.welcome[hidden],.workspace[hidden],.start-menu[hidden],.app-window[hidden]{display:none}.welcome .eyebrow{color:#9edcff;font-size:10px;font-weight:700;letter-spacing:1.7px;text-transform:uppercase}.welcome h1{margin:9px 0 5px;font-size:29px;letter-spacing:-.7px}.welcome p{margin:0;color:var(--muted);font-size:13px}.code-help{margin-top:19px!important}.code-row{display:flex;justify-content:center;gap:9px;margin-top:12px}.code-key{width:44px;height:40px;border:1px solid rgba(255,255,255,.2);border-radius:8px;background:rgba(255,255,255,.08);font-weight:700}.code-key:hover,.code-key:focus-visible{background:rgba(119,199,255,.23);outline:1px solid var(--accent)}.code-status{min-height:20px;margin-top:9px;color:#c5d2e8;font-size:11px}
+    .workspace{position:absolute;inset:0}.desk-label{position:absolute;top:17px;left:50%;color:rgba(255,255,255,.64);font-size:11px;letter-spacing:1.2px;text-transform:uppercase;transform:translateX(-50%)}
+    .taskbar{position:absolute;z-index:20;bottom:0;left:0;right:0;height:58px;display:flex;align-items:center;justify-content:center;gap:7px;padding:7px 15px;background:rgba(13,20,34,.76);border-top:1px solid rgba(255,255,255,.16);backdrop-filter:blur(22px)}.task-icon{position:relative;width:42px;height:42px;border:1px solid transparent;border-radius:9px;background:transparent;font-size:22px;transition:background .15s,transform .15s}.task-icon:hover,.task-icon:focus-visible{background:rgba(255,255,255,.15);transform:translateY(-2px);outline:none}.task-icon.active:after{content:"";position:absolute;bottom:2px;left:15px;right:15px;height:2px;border-radius:3px;background:#a5dcff}.start-button{background:rgba(112,177,255,.13);font-size:19px}.task-separator{height:30px;width:1px;margin:0 3px;background:rgba(255,255,255,.18)}.task-clock{position:absolute;right:15px;text-align:right;font-size:11px;line-height:1.35;color:#e9effa}
+    .start-menu{position:absolute;z-index:19;bottom:66px;left:50%;width:min(410px,calc(100% - 24px));padding:17px;border:1px solid var(--stroke);border-radius:12px;background:rgba(20,29,46,.96);box-shadow:0 20px 70px rgba(0,0,0,.42);backdrop-filter:blur(24px);transform:translateX(-50%)}.start-head{display:flex;align-items:center;gap:11px;padding:3px 4px 14px;border-bottom:1px solid rgba(255,255,255,.11)}.avatar{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#83d9ff,#8b7bff);font-weight:800}.start-head strong{display:block}.start-head small{color:var(--muted)}.start-label{margin:14px 4px 7px;color:var(--muted);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase}.start-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.start-app{display:flex;align-items:center;gap:8px;padding:10px 8px;border:0;border-radius:7px;background:transparent;text-align:left;font-size:12px}.start-app:hover{background:rgba(255,255,255,.1)}
+    .app-window{position:absolute;z-index:10;top:50%;left:50%;width:min(600px,calc(100% - 30px));max-height:calc(100% - 115px);overflow:auto;border:1px solid rgba(255,255,255,.21);border-radius:11px;background:rgba(20,29,46,.97);box-shadow:0 24px 80px rgba(0,0,0,.5);backdrop-filter:blur(24px);transform:translate(-50%,-50%)}.window-titlebar{position:sticky;z-index:1;top:0;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.12);background:rgba(24,34,53,.97);cursor:default}.window-caption{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:650}.window-controls{display:flex;gap:7px}.window-controls button{width:24px;height:23px;border:0;border-radius:4px;background:transparent;color:#dfe8f7}.window-controls button:hover{background:rgba(255,255,255,.15)}.window-controls .close:hover{background:#d94b55}.window-body{padding:18px}.window-body h2{margin:0 0 5px;font-size:20px}.window-body>p{margin:0 0 15px;color:var(--muted);font-size:12px}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:9px}.resource{display:flex;align-items:center;gap:11px;min-height:66px;padding:11px;border:1px solid rgba(255,255,255,.11);border-radius:8px;background:rgba(255,255,255,.045);color:inherit;text-decoration:none}.resource:hover{border-color:rgba(137,200,255,.52);background:rgba(118,176,255,.11)}.resource .resource-icon{font-size:24px}.resource strong{display:block;font-size:12px}.resource small{display:block;margin-top:3px;color:var(--muted);font-size:10px}.app-note{padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:8px;background:rgba(255,255,255,.045);color:#d5deed;font-size:12px}.calc{max-width:290px;margin:auto}.calc-display{width:100%;margin-bottom:9px;padding:12px;border:1px solid rgba(255,255,255,.16);border-radius:7px;background:#0d1523;text-align:right;font-size:22px}.calc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.calc-grid button{height:42px;border:1px solid rgba(255,255,255,.1);border-radius:6px;background:rgba(255,255,255,.08)}.calc-grid button:hover{background:rgba(255,255,255,.18)}.calc-grid .equals{background:#3178c6}.notes{width:100%;min-height:210px;resize:vertical;padding:12px;border:1px solid rgba(255,255,255,.15);border-radius:7px;background:rgba(9,15,25,.75);line-height:1.5}.saved{margin-top:7px;color:#91d6ad;font-size:11px}.browser-bar{display:flex;gap:8px;margin-bottom:12px}.browser-bar input{flex:1;min-width:0;padding:9px 11px;border:1px solid rgba(255,255,255,.15);border-radius:6px;background:rgba(8,14,24,.75);font-size:12px}.browser-bar button{padding:0 13px;border:0;border-radius:6px;background:#3978c6;font-size:12px}.browser-home{padding:18px;border:1px solid rgba(255,255,255,.1);border-radius:8px;background:rgba(255,255,255,.04);color:var(--muted);font-size:12px}.browser-home strong{display:block;margin-bottom:5px;color:var(--ink)}
+    @media(max-width:600px){.topbar{padding:0 9px}.top-left,.top-right{gap:9px}.top-left .top-button{display:none}.desktop-workspace{padding:12px}.desktop-icons{grid-auto-rows:78px}.welcome{top:45%;padding:20px 16px}.taskbar{justify-content:flex-start;padding-left:12px;gap:4px}.task-clock{right:10px}.desk-label{display:none}.start-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;scroll-behavior:auto!important}}
+  </style>
 </head>
 <body>
-    <div class="desktop">
-        <header class="menubar">
-            <div class="menu-left">
-                <div class="os-brand"><span class="os-glyph" aria-hidden="true">✦</span> StudyOS</div>
-                <span class="menu-label">Desktop</span>
-                <span class="menu-label">About</span>
-            </div>
-            <div class="menu-right"><span class="menu-status">◉ Online</span><span id="clock" aria-label="Current time"></span></div>
-        </header>
-
-        <main class="desktop-area">
-            <section class="welcome-widget" id="welcome" aria-labelledby="welcome-title">
-                <div class="widget-kicker">Your personal desktop</div>
-                <h1 id="welcome-title">Welcome back.</h1>
-                <p>A little space for games, videos, and useful links. Enter the desktop code to get started.</p>
-                <div class="code-gate">
-                    <p>Press <strong>6</strong>, then <strong>7</strong> on your keyboard — or click them.</p>
-                    <div class="digit-row" aria-label="Enter the code 67">
-                        <button class="digit" type="button" data-digit="6" aria-label="Enter 6">6</button>
-                        <button class="digit" type="button" data-digit="7" aria-label="Enter 7">7</button>
-                    </div>
-                    <div class="status" id="status" role="status" aria-live="polite">Waiting for code 67…</div>
-                </div>
-            </section>
-
-            <section class="hub" id="hub" hidden aria-label="Desktop applications">
-                <div class="hub-title">Your desktop</div>
-                <div class="desktop-icons">
-                    <button class="desktop-icon" type="button" data-open="games"><span class="icon-art" aria-hidden="true">🎮</span><span class="icon-label">Games</span></button>
-                    <button class="desktop-icon" type="button" data-open="videos"><span class="icon-art" aria-hidden="true">🎬</span><span class="icon-label">Movies &amp; video</span></button>
-                    <button class="desktop-icon" type="button" data-open="tools"><span class="icon-art" aria-hidden="true">🧰</span><span class="icon-label">Tools &amp; info</span></button>
-                </div>
-                <nav class="dock" aria-label="App dock">
-                    <button type="button" data-open="games" aria-label="Open games">🎮</button>
-                    <button type="button" data-open="videos" aria-label="Open movies and video">🎬</button>
-                    <button type="button" data-open="tools" aria-label="Open tools and info">🧰</button>
-                </nav>
-                <section class="window" id="appWindow" role="dialog" aria-modal="true" aria-labelledby="windowTitle" hidden>
-                    <header class="window-bar">
-                        <div class="window-title"><span id="windowIcon" aria-hidden="true">🎮</span><span id="windowTitle">Games</span></div>
-                        <button class="window-close" id="closeWindow" type="button" aria-label="Close window">×</button>
-                    </header>
-                    <div class="window-content" id="windowContent"></div>
-                </section>
-            </section>
-        </main>
-        <div class="toast" aria-hidden="true">StudyOS • Personal desktop</div>
-    </div>
-
-    <script>
-        (() => {
-            const gate = document.getElementById('welcome');
-            const hub = document.getElementById('hub');
-            const status = document.getElementById('status');
-            const appWindow = document.getElementById('appWindow');
-            let entered = '';
-
-            const apps = {
-                games: {
-                    title: 'Games', icon: '🎮', intro: 'Your game shelf. Select a link to visit its official page.',
-                    items: [['Brotato', 'Official game page on Steam', 'https://store.steampowered.com/app/1942280/Brotato/']]
-                },
-                videos: {
-                    title: 'Movies & video', icon: '🎬', intro: 'Explore video and film collections from established services.',
-                    items: [['PBS Video', 'Programs and documentaries', 'https://www.pbs.org/video/'], ['Public-domain films', 'Feature films at the Internet Archive', 'https://archive.org/details/feature_films']]
-                },
-                tools: {
-                    title: 'Tools & info', icon: '🧰', intro: 'A few notes about this desktop.',
-                    notice: '<strong>Safe browsing:</strong> External links open in a new tab. Use only tools approved by your school or network administrator. This demo does not include a general-purpose proxy.'
-                }
-            };
-
-            function enterDigit(digit) {
-                entered = (entered + digit).slice(-2);
-                if (entered === '67') {
-                    gate.hidden = true;
-                    hub.hidden = false;
-                    document.querySelector('[data-open="games"]').focus();
-                    return;
-                }
-                status.textContent = entered === '6' ? '6 entered — now enter 7.' : 'Not quite. Try 6, then 7.';
-                if (entered !== '6') entered = '';
-            }
-
-            function openApp(name) {
-                const app = apps[name];
-                if (!app) return;
-                document.getElementById('windowIcon').textContent = app.icon;
-                document.getElementById('windowTitle').textContent = app.title;
-                const content = document.getElementById('windowContent');
-                content.replaceChildren();
-                const intro = document.createElement('p');
-                intro.textContent = app.intro;
-                content.append(intro);
-
-                if (app.items) {
-                    const list = document.createElement('div');
-                    list.className = 'app-list';
-                    app.items.forEach(([title, description, href]) => {
-                        const link = document.createElement('a');
-                        link.className = 'app-link';
-                        link.href = href;
-                        link.target = '_blank';
-                        link.rel = 'noopener noreferrer';
-                        const text = document.createElement('span');
-                        const strong = document.createElement('strong');
-                        strong.textContent = title;
-                        const small = document.createElement('small');
-                        small.textContent = description;
-                        text.append(strong, small);
-                        const arrow = document.createElement('span');
-                        arrow.className = 'arrow';
-                        arrow.textContent = '↗';
-                        arrow.setAttribute('aria-hidden', 'true');
-                        link.append(text, arrow);
-                        list.append(link);
-                    });
-                    content.append(list);
-                } else {
-                    const notice = document.createElement('div');
-                    notice.className = 'notice';
-                    notice.innerHTML = app.notice;
-                    content.append(notice);
-                }
-                appWindow.hidden = false;
-                document.getElementById('closeWindow').focus();
-            }
-
-            document.querySelectorAll('[data-digit]').forEach((button) => {
-                button.addEventListener('click', () => enterDigit(button.dataset.digit));
-            });
-            document.addEventListener('keydown', (event) => {
-                if (!gate.hidden && (event.key === '6' || event.key === '7')) enterDigit(event.key);
-                if (event.key === 'Escape') appWindow.hidden = true;
-            });
-            document.querySelectorAll('[data-open]').forEach((button) => {
-                button.addEventListener('click', () => openApp(button.dataset.open));
-            });
-            document.getElementById('closeWindow').addEventListener('click', () => { appWindow.hidden = true; });
-
-            const clock = document.getElementById('clock');
-            function updateClock() {
-                clock.textContent = new Intl.DateTimeFormat([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date());
-            }
-            updateClock();
-            setInterval(updateClock, 30000);
-        })();
-    </script>
+  <div class="desktop">
+    <header class="topbar">
+      <div class="top-left"><div class="brand"><span>◈</span> StudyOS</div><button class="top-button" type="button" data-top="about">About</button><button class="top-button" type="button" data-top="help">Help</button></div>
+      <div class="top-right"><div class="system-tray"><span title="Network">◉</span><span title="Sound">◖))</span><span title="Power">▰</span></div><span id="topClock"></span></div>
+    </header>
+    <main class="desktop-workspace">
+      <section class="welcome" id="welcome" aria-labelledby="welcome-title">
+        <div class="eyebrow">StudyOS • Personal edition</div><h1 id="welcome-title">Welcome back</h1><p>Your desktop is ready. Enter the access code to continue.</p>
+        <p class="code-help">Press <strong>6</strong>, then <strong>7</strong> on your keyboard or click the keys.</p>
+        <div class="code-row"><button class="code-key" type="button" data-digit="6">6</button><button class="code-key" type="button" data-digit="7">7</button></div>
+        <div class="code-status" id="codeStatus" role="status" aria-live="polite">Waiting for code 67…</div>
+      </section>
+      <section class="workspace" id="workspace" hidden aria-label="StudyOS desktop">
+        <div class="desk-label">Personal workspace</div>
+        <div class="desktop-icons">
+          <button class="desk-icon" data-app="games" type="button"><span class="emoji">🎮</span><span class="label">Game shelf</span></button>
+          <button class="desk-icon" data-app="media" type="button"><span class="emoji">🎞️</span><span class="label">Media</span></button>
+          <button class="desk-icon" data-app="browser" type="button"><span class="emoji">🌐</span><span class="label">Web links</span></button>
+          <button class="desk-icon" data-app="notes" type="button"><span class="emoji">📝</span><span class="label">Notes</span></button>
+          <button class="desk-icon" data-app="calculator" type="button"><span class="emoji">🧮</span><span class="label">Calculator</span></button>
+          <button class="desk-icon" data-app="settings" type="button"><span class="emoji">⚙️</span><span class="label">Settings</span></button>
+        </div>
+        <nav class="taskbar" aria-label="Taskbar">
+          <button class="task-icon start-button" id="startButton" type="button" aria-label="Open Start menu">◈</button><span class="task-separator"></span>
+          <button class="task-icon" data-app="games" type="button" aria-label="Game shelf">🎮</button><button class="task-icon" data-app="media" type="button" aria-label="Media">🎞️</button><button class="task-icon" data-app="browser" type="button" aria-label="Web links">🌐</button><button class="task-icon" data-app="notes" type="button" aria-label="Notes">📝</button><button class="task-icon" data-app="calculator" type="button" aria-label="Calculator">🧮</button>
+          <div class="task-clock"><div id="taskTime"></div><div id="taskDate"></div></div>
+        </nav>
+        <section class="start-menu" id="startMenu" hidden aria-label="Start menu">
+          <div class="start-head"><div class="avatar">S</div><div><strong>StudyOS user</strong><small>Personal desktop</small></div></div>
+          <div class="start-label">Pinned apps</div>
+          <div class="start-grid"><button class="start-app" data-app="games" type="button">🎮 Game shelf</button><button class="start-app" data-app="media" type="button">🎞️ Media</button><button class="start-app" data-app="browser" type="button">🌐 Web links</button><button class="start-app" data-app="notes" type="button">📝 Notes</button><button class="start-app" data-app="calculator" type="button">🧮 Calculator</button><button class="start-app" data-app="settings" type="button">⚙️ Settings</button></div>
+        </section>
+        <section class="app-window" id="appWindow" role="dialog" aria-modal="true" aria-labelledby="windowTitle" hidden>
+          <header class="window-titlebar"><div class="window-caption"><span id="windowIcon">🎮</span><span id="windowTitle">Game shelf</span></div><div class="window-controls"><button id="minimizeWindow" type="button" aria-label="Minimize">—</button><button id="closeWindow" class="close" type="button" aria-label="Close">×</button></div></header>
+          <div class="window-body" id="windowBody"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+  <script>
+    (() => {
+      const welcome=document.getElementById('welcome'),workspace=document.getElementById('workspace'),status=document.getElementById('codeStatus'),appWindow=document.getElementById('appWindow'),startMenu=document.getElementById('startMenu'),body=document.getElementById('windowBody');
+      let code='';let calcValue='0';let calcPending=null;let calcStored=null;let calcFresh=false;
+      const apps={
+        games:{title:'Game shelf',icon:'🎮',intro:'Game links to official pages and established game libraries.',items:[['Brotato','Official game page','https://store.steampowered.com/app/1942280/Brotato/','🥔'],['Coolmath Games','Browse casual and puzzle games','https://www.coolmathgames.com/','🧩'],['Poki','Play browser games on Poki','https://poki.com/','🕹️'],['itch.io — free games','Discover independent games','https://itch.io/games/free','🎲'],['Steam','Explore the PC game library','https://store.steampowered.com/','🛍️']]},
+        media:{title:'Media library',icon:'🎞️',intro:'Video and film collections from established services.',items:[['PBS Video','Programs and documentaries','https://www.pbs.org/video/','📺'],['Public-domain films','Feature films at Internet Archive','https://archive.org/details/feature_films','🎥'],['NASA+','NASA shows and live coverage','https://plus.nasa.gov/','🚀'],['YouTube','Videos and channels','https://www.youtube.com/','▶️']]},
+        browser:{title:'Web links',icon:'🌐',intro:'A small collection of useful public websites. This is a shortcut launcher, not a proxy.',items:[['Khan Academy','Free lessons and practice','https://www.khanacademy.org/','📘'],['Wikipedia','Online encyclopedia','https://www.wikipedia.org/','📚'],['NASA','Space, science, and missions','https://www.nasa.gov/','🪐'],['Internet Archive','Explore books, media, and history','https://archive.org/','🏛️']]},
+        settings:{title:'Settings & safety',icon:'⚙️',intro:'About this desktop experience.',note:'<strong>StudyOS demo</strong><br>This is a browser-based desktop-style page, not a real operating system. External sites open in a new tab. Proxy discovery and network-bypass tools are not included; use only services permitted by your network or school.'}
+      };
+      function enterDigit(d){code=(code+d).slice(-2);if(code==='67'){welcome.hidden=true;workspace.hidden=false;document.querySelector('[data-app="games"]').focus();return}status.textContent=code==='6'?'6 entered — now press 7.':'Try again: enter 6, then 7.';if(code!=='6')code=''}
+      function makeCards(items){const grid=document.createElement('div');grid.className='cards';items.forEach(([title,desc,url,icon])=>{const a=document.createElement('a');a.className='resource';a.href=url;a.target='_blank';a.rel='noopener noreferrer';const emoji=document.createElement('span');emoji.className='resource-icon';emoji.textContent=icon;const copy=document.createElement('span');const strong=document.createElement('strong');strong.textContent=title;const small=document.createElement('small');small.textContent=desc;copy.append(strong,small);a.append(emoji,copy);grid.append(a)});return grid}
+      function openApp(name){startMenu.hidden=true;const app=apps[name];document.getElementById('windowIcon').textContent=app?app.icon:(name==='notes'?'📝':'🧮');document.getElementById('windowTitle').textContent=app?app.title:(name==='notes'?'Notes':'Calculator');body.replaceChildren();if(app){const heading=document.createElement('h2');heading.textContent=app.title;const intro=document.createElement('p');intro.textContent=app.intro;body.append(heading,intro);if(app.items)body.append(makeCards(app.items));if(app.note){const note=document.createElement('div');note.className='app-note';note.innerHTML=app.note;body.append(note)}}else if(name==='notes'){renderNotes()}else if(name==='calculator'){renderCalculator()}appWindow.hidden=false;document.getElementById('closeWindow').focus()}
+      function renderNotes(){const label=document.createElement('p');label.textContent='Your note is saved in this browser on this device.';const area=document.createElement('textarea');area.className='notes';area.setAttribute('aria-label','Personal notes');area.placeholder='Write a note…';area.value=localStorage.getItem('studyos-notes')||'';const saved=document.createElement('div');saved.className='saved';saved.textContent='Saved locally';area.addEventListener('input',()=>{localStorage.setItem('studyos-notes',area.value);saved.textContent='Saved locally'});body.append(label,area,saved)}
+      function renderCalculator(){const display=document.createElement('div');display.className='calc-display';display.textContent=calcValue;display.setAttribute('aria-live','polite');const grid=document.createElement('div');grid.className='calc-grid';[['AC','clear'],['±','sign'],['%','percent'],['÷','/'],['7','7'],['8','8'],['9','9'],['×','*'],['4','4'],['5','5'],['6','6'],['−','-'],['1','1'],['2','2'],['3','3'],['+','+'],['0','0'],['.','.'],['⌫','back'],['=','=']].forEach(([label,value])=>{const b=document.createElement('button');b.textContent=label;if(value==='=')b.className='equals';b.addEventListener('click',()=>{if(value==='clear'){calcValue='0';calcPending=null;calcStored=null}else if(value==='back'){calcValue=calcValue.length>1?calcValue.slice(0,-1):'0'}else if(value==='sign'){calcValue=String(Number(calcValue)*-1)}else if(value==='percent'){calcValue=String(Number(calcValue)/100)}else if(['+','-','*','/'].includes(value)){calcStored=Number(calcValue);calcPending=value;calcFresh=true}else if(value==='='){const right=Number(calcValue);if(calcPending&&calcStored!==null){const result=calcPending==='+'?calcStored+right:calcPending==='-'?calcStored-right:calcPending==='*'?calcStored*right: right===0?NaN:calcStored/right;calcValue=Number.isFinite(result)?String(Number(result.toFixed(8))):'Error';calcPending=null;calcStored=null;calcFresh=true}}else if(value==='.'){if(calcFresh){calcValue='0.';calcFresh=false}else if(!calcValue.includes('.'))calcValue+='.'}else{if(calcFresh||calcValue==='0'||calcValue==='Error'){calcValue=value;calcFresh=false}else calcValue+=value}display.textContent=calcValue});grid.append(b)});const wrap=document.createElement('div');wrap.className='calc';wrap.append(display,grid);body.append(wrap)}
+      document.querySelectorAll('[data-digit]').forEach(b=>b.addEventListener('click',()=>enterDigit(b.dataset.digit)));
+      document.addEventListener('keydown',e=>{if(!welcome.hidden&&(e.key==='6'||e.key==='7'))enterDigit(e.key);if(e.key==='Escape'){appWindow.hidden=true;startMenu.hidden=true}});
+      document.querySelectorAll('[data-app]').forEach(b=>b.addEventListener('click',()=>openApp(b.dataset.app)));
+      document.getElementById('startButton').addEventListener('click',()=>{startMenu.hidden=!startMenu.hidden;appWindow.hidden=true});
+      document.getElementById('closeWindow').addEventListener('click',()=>appWindow.hidden=true);
+      document.getElementById('minimizeWindow').addEventListener('click',()=>appWindow.hidden=true);
+      document.querySelectorAll('[data-top]').forEach(b=>b.addEventListener('click',()=>openApp('settings')));
+      function updateClock(){const now=new Date();document.getElementById('topClock').textContent=new Intl.DateTimeFormat([], {hour:'numeric',minute:'2-digit'}).format(now);document.getElementById('taskTime').textContent=new Intl.DateTimeFormat([], {hour:'numeric',minute:'2-digit'}).format(now);document.getElementById('taskDate').textContent=new Intl.DateTimeFormat([], {weekday:'short',month:'short',day:'numeric'}).format(now)}updateClock();setInterval(updateClock,30000);
+    })();
+  </script>
 </body>
 </html>
