@@ -3,172 +3,317 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#f8f9fa">
-    <title>Study Hall</title>
+    <meta name="theme-color" content="#101426">
+    <title>StudyOS — Desktop</title>
     <style>
         :root {
-            color-scheme: light;
-            --ink: #202124;
-            --muted: #5f6368;
-            --blue: #1a73e8;
-            --line: #dadce0;
-            --page: #f8f9fa;
+            color-scheme: dark;
+            --text: #f7f8ff;
+            --muted: #a9b0c9;
+            --glass: rgba(23, 28, 54, .72);
+            --glass-strong: rgba(19, 23, 45, .94);
+            --line: rgba(255,255,255,.15);
+            --accent: #9c8cff;
         }
         * { box-sizing: border-box; }
         body {
             margin: 0;
             min-height: 100vh;
-            color: var(--ink);
-            background: var(--page);
-            font-family: Arial, Helvetica, sans-serif;
+            overflow: hidden;
+            color: var(--text);
+            background: #101426;
+            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
-        .topbar {
-            height: 68px;
-            padding: 0 28px;
+        button { font: inherit; color: inherit; }
+        .desktop {
+            position: relative;
+            min-height: 100vh;
+            isolation: isolate;
+            overflow: hidden;
+            background:
+                radial-gradient(ellipse at 18% 25%, rgba(116, 95, 255, .52), transparent 38%),
+                radial-gradient(ellipse at 82% 18%, rgba(32, 205, 225, .33), transparent 34%),
+                radial-gradient(ellipse at 74% 84%, rgba(232, 86, 177, .26), transparent 38%),
+                linear-gradient(135deg, #12162d 5%, #20234c 52%, #111629 100%);
+        }
+        .desktop::before, .desktop::after {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            width: 45vw;
+            height: 45vw;
+            min-width: 360px;
+            min-height: 360px;
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 46% 54% 60% 40%;
+            transform: rotate(-24deg);
+            pointer-events: none;
+        }
+        .desktop::before { top: 16%; left: 30%; box-shadow: 0 0 100px rgba(125,110,255,.16) inset; }
+        .desktop::after { top: 23%; left: 36%; transform: rotate(28deg); }
+        .menubar {
+            height: 42px;
             display: flex;
             align-items: center;
-            gap: 14px;
-            background: #fff;
-            border-bottom: 1px solid var(--line);
+            justify-content: space-between;
+            gap: 12px;
+            padding: 0 20px;
+            background: rgba(9,12,26,.42);
+            border-bottom: 1px solid rgba(255,255,255,.1);
+            backdrop-filter: blur(18px);
+            font-size: 13px;
         }
-        .mark {
-            width: 38px;
-            height: 38px;
-            display: grid;
-            place-items: center;
+        .menu-left, .menu-right { display: flex; align-items: center; gap: 16px; }
+        .os-brand { display: flex; align-items: center; gap: 8px; font-weight: 750; letter-spacing: .2px; }
+        .os-glyph { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 7px; background: linear-gradient(145deg,#b6a4ff,#6c64e8); }
+        .menu-label { color: #e3e5f4; }
+        .menu-status { color: #d3d6e8; }
+        .desktop-area { position: relative; min-height: calc(100vh - 42px); padding: 32px; }
+        .desktop-icons { display: grid; width: 100px; gap: 18px; }
+        .desktop-icon {
+            width: 92px;
+            min-height: 88px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            padding: 8px 4px;
+            border: 1px solid transparent;
             border-radius: 12px;
-            color: #fff;
-            background: #4285f4;
-            font-size: 20px;
-            font-weight: 700;
-        }
-        .brand { font-size: 20px; color: var(--muted); }
-        .brand strong { color: var(--ink); font-weight: 500; }
-        main { width: min(1050px, calc(100% - 36px)); margin: 54px auto; }
-        .welcome { margin-bottom: 30px; }
-        h1 { margin: 0 0 10px; font-size: clamp(28px, 5vw, 36px); font-weight: 400; }
-        .welcome p, .subtle { color: var(--muted); line-height: 1.55; }
-        .class-card, .gate, .resource-card {
-            background: #fff;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            box-shadow: 0 1px 2px rgba(60, 64, 67, .12);
-        }
-        .gate { max-width: 560px; padding: 26px; }
-        .gate h2 { margin: 0 0 8px; font-size: 20px; font-weight: 500; }
-        .gate p { color: var(--muted); line-height: 1.5; }
-        .digits { display: flex; gap: 12px; margin-top: 20px; }
-        .digit {
-            width: 58px;
-            height: 52px;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: #fff;
-            color: var(--blue);
-            font-size: 20px;
+            background: transparent;
             cursor: pointer;
+            text-align: center;
+            text-shadow: 0 2px 6px rgba(0,0,0,.45);
         }
-        .digit:hover, .digit:focus-visible { background: #e8f0fe; outline: 2px solid #a8c7fa; }
-        .status { min-height: 22px; margin-top: 14px; color: var(--muted); font-size: 14px; }
-        .hub[hidden], .gate[hidden] { display: none; }
-        .hub-heading { margin: 0 0 20px; font-size: 22px; font-weight: 500; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 18px; }
-        .resource-card { overflow: hidden; }
-        .card-color { height: 110px; display: grid; place-items: center; font-size: 42px; }
-        .games { background: #e8f0fe; }
-        .movies { background: #fce8e6; }
-        .tools { background: #e6f4ea; }
-        .card-body { padding: 18px; }
-        .card-body h3 { margin: 0 0 8px; font-size: 18px; font-weight: 500; }
-        .card-body p { min-height: 42px; margin: 0 0 16px; color: var(--muted); font-size: 14px; line-height: 1.5; }
-        .links { display: flex; flex-wrap: wrap; gap: 12px; }
-        a { color: var(--blue); font-size: 14px; font-weight: 600; text-decoration: none; }
-        a:hover { text-decoration: underline; }
-        .disabled-note { color: var(--muted); font-size: 13px; }
-        footer { margin-top: 34px; color: var(--muted); font-size: 12px; }
-        @media (max-width: 520px) {
-            .topbar { padding: 0 18px; }
-            main { margin-top: 34px; }
-            .gate { padding: 20px; }
+        .desktop-icon:hover, .desktop-icon:focus-visible { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.18); outline: none; }
+        .icon-art { font-size: 34px; filter: drop-shadow(0 6px 10px rgba(0,0,0,.25)); }
+        .icon-label { font-size: 12px; font-weight: 550; }
+        .welcome-widget {
+            position: absolute;
+            top: 12%;
+            left: 50%;
+            width: min(440px, calc(100% - 44px));
+            padding: 24px;
+            border: 1px solid var(--line);
+            border-radius: 22px;
+            background: var(--glass);
+            box-shadow: 0 24px 80px rgba(0,0,0,.24);
+            backdrop-filter: blur(24px);
+            transform: translateX(-50%);
+            text-align: center;
         }
+        .widget-kicker { color: #c5baff; font-size: 11px; font-weight: 750; letter-spacing: 1.8px; text-transform: uppercase; }
+        .welcome-widget h1 { margin: 10px 0 8px; font-size: clamp(27px, 5vw, 38px); letter-spacing: -1.2px; }
+        .welcome-widget p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
+        .code-gate { margin-top: 21px; }
+        .code-gate p { margin-bottom: 13px; font-size: 13px; }
+        .digit-row { display: flex; justify-content: center; gap: 10px; }
+        .digit {
+            width: 47px;
+            height: 43px;
+            border: 1px solid rgba(255,255,255,.22);
+            border-radius: 12px;
+            background: rgba(255,255,255,.08);
+            cursor: pointer;
+            font-size: 17px;
+            font-weight: 700;
+            transition: .18s ease;
+        }
+        .digit:hover, .digit:focus-visible { border-color: #b7aaff; background: rgba(156,140,255,.25); outline: none; transform: translateY(-2px); }
+        .status { min-height: 18px; margin-top: 12px; color: #c2c7dc; font-size: 12px; }
+        .hub[hidden], .welcome-widget[hidden] { display: none; }
+        .hub-title { position: absolute; top: 14px; left: 50%; margin: 0; transform: translateX(-50%); color: rgba(255,255,255,.7); font-size: 12px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+        .dock {
+            position: absolute;
+            bottom: 18px;
+            left: 50%;
+            display: flex;
+            align-items: end;
+            gap: 10px;
+            padding: 9px 12px;
+            border: 1px solid rgba(255,255,255,.17);
+            border-radius: 20px;
+            background: rgba(20,23,43,.62);
+            box-shadow: 0 14px 40px rgba(0,0,0,.28);
+            backdrop-filter: blur(22px);
+            transform: translateX(-50%);
+        }
+        .dock button { width: 48px; height: 48px; border: 0; border-radius: 14px; background: rgba(255,255,255,.1); cursor: pointer; font-size: 25px; transition: .18s ease; }
+        .dock button:hover, .dock button:focus-visible { background: rgba(255,255,255,.2); outline: 1px solid rgba(255,255,255,.25); transform: translateY(-5px) scale(1.06); }
+        .window {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: min(620px, calc(100% - 34px));
+            max-height: min(540px, calc(100% - 130px));
+            overflow: auto;
+            border: 1px solid rgba(255,255,255,.2);
+            border-radius: 18px;
+            background: var(--glass-strong);
+            box-shadow: 0 30px 90px rgba(0,0,0,.45);
+            backdrop-filter: blur(26px);
+            transform: translate(-50%, -50%);
+        }
+        .window[hidden] { display: none; }
+        .window-bar { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; padding: 14px 17px; border-bottom: 1px solid rgba(255,255,255,.12); background: rgba(19,23,45,.92); }
+        .window-title { display: flex; align-items: center; gap: 9px; font-size: 14px; font-weight: 700; }
+        .window-close { width: 30px; height: 30px; border: 0; border-radius: 9px; background: rgba(255,255,255,.1); cursor: pointer; font-size: 18px; }
+        .window-close:hover { background: rgba(255,255,255,.2); }
+        .window-content { padding: 20px; }
+        .window-content > p { margin: 0 0 18px; color: var(--muted); font-size: 13px; line-height: 1.55; }
+        .app-list { display: grid; gap: 11px; }
+        .app-link { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px; border: 1px solid rgba(255,255,255,.12); border-radius: 14px; background: rgba(255,255,255,.055); text-decoration: none; transition: .18s ease; }
+        .app-link:hover { border-color: rgba(183,170,255,.55); background: rgba(156,140,255,.12); transform: translateY(-1px); }
+        .app-link strong { display: block; margin-bottom: 4px; color: var(--text); font-size: 14px; }
+        .app-link small { color: var(--muted); font-size: 12px; }
+        .app-link .arrow { color: #c4b8ff; font-size: 17px; }
+        .notice { padding: 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 12px; color: #d5d9ec; background: rgba(255,255,255,.05); font-size: 13px; line-height: 1.55; }
+        .notice strong { color: white; }
+        .toast { position: absolute; right: 22px; bottom: 22px; color: rgba(255,255,255,.65); font-size: 11px; }
+        @media (max-width: 620px) {
+            .menubar { padding: 0 12px; }
+            .menu-left, .menu-right { gap: 9px; }
+            .menu-label { display: none; }
+            .desktop-area { padding: 22px 12px; }
+            .desktop-icons { width: 74px; gap: 12px; }
+            .desktop-icon { width: 70px; min-height: 75px; }
+            .welcome-widget { top: 15%; padding: 20px 16px; }
+            .hub-title { top: 8px; }
+            .dock { bottom: 12px; gap: 7px; padding: 8px; }
+            .dock button { width: 43px; height: 43px; }
+            .toast { display: none; }
+        }
+        @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
     </style>
 </head>
 <body>
-    <header class="topbar">
-        <div class="mark" aria-hidden="true">S</div>
-        <div class="brand"><strong>Study Hall</strong> <span aria-hidden="true">·</span> Home</div>
-    </header>
-
-    <main>
-        <section class="welcome" aria-labelledby="page-title">
-            <h1 id="page-title">Welcome to your study hall</h1>
-            <p>A classroom-inspired home page for your favorite games and viewing resources.</p>
-        </section>
-
-        <section class="gate" id="gate" aria-labelledby="gate-title">
-            <h2 id="gate-title">Enter the room</h2>
-            <p>Press <strong>6</strong>, then <strong>7</strong> on your keyboard, or click the buttons below in that order.</p>
-            <div class="digits" aria-label="Enter the code 67">
-                <button class="digit" type="button" data-digit="6" aria-label="Enter 6">6</button>
-                <button class="digit" type="button" data-digit="7" aria-label="Enter 7">7</button>
+    <div class="desktop">
+        <header class="menubar">
+            <div class="menu-left">
+                <div class="os-brand"><span class="os-glyph" aria-hidden="true">✦</span> StudyOS</div>
+                <span class="menu-label">Desktop</span>
+                <span class="menu-label">About</span>
             </div>
-            <div class="status" id="status" role="status" aria-live="polite">Waiting for code 67…</div>
-        </section>
+            <div class="menu-right"><span class="menu-status">◉ Online</span><span id="clock" aria-label="Current time"></span></div>
+        </header>
 
-        <section class="hub" id="hub" hidden aria-labelledby="hub-title">
-            <h2 class="hub-heading" id="hub-title">Your room</h2>
-            <div class="grid">
-                <article class="resource-card">
-                    <div class="card-color games" aria-hidden="true">🎮</div>
-                    <div class="card-body">
-                        <h3>Games</h3>
-                        <p>Pick a game to check out.</p>
-                        <div class="links">
-                            <a href="https://store.steampowered.com/app/1942280/Brotato/" target="_blank" rel="noopener noreferrer">Brotato ↗</a>
-                        </div>
+        <main class="desktop-area">
+            <section class="welcome-widget" id="welcome" aria-labelledby="welcome-title">
+                <div class="widget-kicker">Your personal desktop</div>
+                <h1 id="welcome-title">Welcome back.</h1>
+                <p>A little space for games, videos, and useful links. Enter the desktop code to get started.</p>
+                <div class="code-gate">
+                    <p>Press <strong>6</strong>, then <strong>7</strong> on your keyboard — or click them.</p>
+                    <div class="digit-row" aria-label="Enter the code 67">
+                        <button class="digit" type="button" data-digit="6" aria-label="Enter 6">6</button>
+                        <button class="digit" type="button" data-digit="7" aria-label="Enter 7">7</button>
                     </div>
-                </article>
-                <article class="resource-card">
-                    <div class="card-color movies" aria-hidden="true">🎬</div>
-                    <div class="card-body">
-                        <h3>Movies &amp; video</h3>
-                        <p>Browse video and films from established services.</p>
-                        <div class="links">
-                            <a href="https://www.pbs.org/video/" target="_blank" rel="noopener noreferrer">PBS Video ↗</a>
-                            <a href="https://archive.org/details/feature_films" target="_blank" rel="noopener noreferrer">Public-domain films ↗</a>
-                        </div>
-                    </div>
-                </article>
-                <article class="resource-card">
-                    <div class="card-color tools" aria-hidden="true">🛡️</div>
-                    <div class="card-body">
-                        <h3>Approved tools</h3>
-                        <p>Use only access tools provided or approved by your school or network administrator.</p>
-                        <span class="disabled-note">No general-purpose proxy is built into this page.</span>
-                    </div>
-                </article>
-            </div>
-            <footer>External links open in a new tab. Follow your school or network’s acceptable-use rules.</footer>
-        </section>
-    </main>
+                    <div class="status" id="status" role="status" aria-live="polite">Waiting for code 67…</div>
+                </div>
+            </section>
+
+            <section class="hub" id="hub" hidden aria-label="Desktop applications">
+                <div class="hub-title">Your desktop</div>
+                <div class="desktop-icons">
+                    <button class="desktop-icon" type="button" data-open="games"><span class="icon-art" aria-hidden="true">🎮</span><span class="icon-label">Games</span></button>
+                    <button class="desktop-icon" type="button" data-open="videos"><span class="icon-art" aria-hidden="true">🎬</span><span class="icon-label">Movies &amp; video</span></button>
+                    <button class="desktop-icon" type="button" data-open="tools"><span class="icon-art" aria-hidden="true">🧰</span><span class="icon-label">Tools &amp; info</span></button>
+                </div>
+                <nav class="dock" aria-label="App dock">
+                    <button type="button" data-open="games" aria-label="Open games">🎮</button>
+                    <button type="button" data-open="videos" aria-label="Open movies and video">🎬</button>
+                    <button type="button" data-open="tools" aria-label="Open tools and info">🧰</button>
+                </nav>
+                <section class="window" id="appWindow" role="dialog" aria-modal="true" aria-labelledby="windowTitle" hidden>
+                    <header class="window-bar">
+                        <div class="window-title"><span id="windowIcon" aria-hidden="true">🎮</span><span id="windowTitle">Games</span></div>
+                        <button class="window-close" id="closeWindow" type="button" aria-label="Close window">×</button>
+                    </header>
+                    <div class="window-content" id="windowContent"></div>
+                </section>
+            </section>
+        </main>
+        <div class="toast" aria-hidden="true">StudyOS • Personal desktop</div>
+    </div>
 
     <script>
         (() => {
-            const gate = document.getElementById('gate');
+            const gate = document.getElementById('welcome');
             const hub = document.getElementById('hub');
             const status = document.getElementById('status');
+            const appWindow = document.getElementById('appWindow');
             let entered = '';
+
+            const apps = {
+                games: {
+                    title: 'Games', icon: '🎮', intro: 'Your game shelf. Select a link to visit its official page.',
+                    items: [['Brotato', 'Official game page on Steam', 'https://store.steampowered.com/app/1942280/Brotato/']]
+                },
+                videos: {
+                    title: 'Movies & video', icon: '🎬', intro: 'Explore video and film collections from established services.',
+                    items: [['PBS Video', 'Programs and documentaries', 'https://www.pbs.org/video/'], ['Public-domain films', 'Feature films at the Internet Archive', 'https://archive.org/details/feature_films']]
+                },
+                tools: {
+                    title: 'Tools & info', icon: '🧰', intro: 'A few notes about this desktop.',
+                    notice: '<strong>Safe browsing:</strong> External links open in a new tab. Use only tools approved by your school or network administrator. This demo does not include a general-purpose proxy.'
+                }
+            };
 
             function enterDigit(digit) {
                 entered = (entered + digit).slice(-2);
                 if (entered === '67') {
                     gate.hidden = true;
                     hub.hidden = false;
-                    document.getElementById('hub-title').focus();
+                    document.querySelector('[data-open="games"]').focus();
                     return;
                 }
-                status.textContent = entered === '6' ? '6 entered — now enter 7.' : 'That is not the code. Try 6, then 7.';
+                status.textContent = entered === '6' ? '6 entered — now enter 7.' : 'Not quite. Try 6, then 7.';
                 if (entered !== '6') entered = '';
+            }
+
+            function openApp(name) {
+                const app = apps[name];
+                if (!app) return;
+                document.getElementById('windowIcon').textContent = app.icon;
+                document.getElementById('windowTitle').textContent = app.title;
+                const content = document.getElementById('windowContent');
+                content.replaceChildren();
+                const intro = document.createElement('p');
+                intro.textContent = app.intro;
+                content.append(intro);
+
+                if (app.items) {
+                    const list = document.createElement('div');
+                    list.className = 'app-list';
+                    app.items.forEach(([title, description, href]) => {
+                        const link = document.createElement('a');
+                        link.className = 'app-link';
+                        link.href = href;
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        const text = document.createElement('span');
+                        const strong = document.createElement('strong');
+                        strong.textContent = title;
+                        const small = document.createElement('small');
+                        small.textContent = description;
+                        text.append(strong, small);
+                        const arrow = document.createElement('span');
+                        arrow.className = 'arrow';
+                        arrow.textContent = '↗';
+                        arrow.setAttribute('aria-hidden', 'true');
+                        link.append(text, arrow);
+                        list.append(link);
+                    });
+                    content.append(list);
+                } else {
+                    const notice = document.createElement('div');
+                    notice.className = 'notice';
+                    notice.innerHTML = app.notice;
+                    content.append(notice);
+                }
+                appWindow.hidden = false;
+                document.getElementById('closeWindow').focus();
             }
 
             document.querySelectorAll('[data-digit]').forEach((button) => {
@@ -176,7 +321,19 @@
             });
             document.addEventListener('keydown', (event) => {
                 if (!gate.hidden && (event.key === '6' || event.key === '7')) enterDigit(event.key);
+                if (event.key === 'Escape') appWindow.hidden = true;
             });
+            document.querySelectorAll('[data-open]').forEach((button) => {
+                button.addEventListener('click', () => openApp(button.dataset.open));
+            });
+            document.getElementById('closeWindow').addEventListener('click', () => { appWindow.hidden = true; });
+
+            const clock = document.getElementById('clock');
+            function updateClock() {
+                clock.textContent = new Intl.DateTimeFormat([], { weekday: 'short', hour: 'numeric', minute: '2-digit' }).format(new Date());
+            }
+            updateClock();
+            setInterval(updateClock, 30000);
         })();
     </script>
 </body>
